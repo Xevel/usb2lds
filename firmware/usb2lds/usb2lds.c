@@ -35,6 +35,7 @@
  */
 
 #include "usb2lds.h"
+#include "reset.h"
 
 /** LUFA CDC Class driver interface configuration and state information. This structure is
  *  passed to all CDC Class driver functions, so that multiple instances of the same class
@@ -72,6 +73,9 @@ USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface =
 static FILE USBSerialStream;
 
 
+uint8_t needs_bootload = false; // In EVENT_CDC_Device_LineEncodingChanged, this flag is set when the baudrate is at a pre-defined value
+
+
 /** Main program entry point. This routine contains the overall program flow, including initial
  *  setup of all components and the main program loop.
  */
@@ -87,7 +91,7 @@ int main(void)
 
 	for (;;)
 	{
-		CheckJoystickMovement();
+		// TODO do stuff
 
 		/* Must throw away unused bytes from the host, or it will lock up while waiting for the device */
 		CDC_Device_ReceiveByte(&VirtualSerial_CDC_Interface);
@@ -97,65 +101,57 @@ int main(void)
 	}
 }
 
+
+void init_serial(long baud){
+    UCSR1B = 0; // disable USART emitter and receiver, as well as all relative interrupts
+    // (Must turn off USART before reconfiguring it, otherwise incorrect operation may occur)
+    UCSR1A = 0; // no frequency doubling, disable Multi-processor communication mode
+    UCSR1C = (1<<UCSZ11) | (1<<UCSZ10); // Asynchronous USART, no parity, 1 bit stop, 8-bit (aka 8N1)
+    
+    
+    // we want the actual baud rate to be as close as possible to the theoretical baud rate,
+    // and at the same time we want to avoid using frequency doubling if possible, since it
+    // cuts by half the number of sample the receiver will use, and makes it more vulnerable
+    // to baud rate and clock inaccuracy.
+    int32_t ubbr = SERIAL_UBBRVAL(baud);
+    int32_t br = F_CPU /(16UL*(ubbr+1));
+
+    int32_t ubbr2x = SERIAL_2X_UBBRVAL(baud);
+    int32_t br2x = F_CPU /(8UL*(ubbr2x+1));
+
+    if ( max(baud,br) - min(baud,br) <= max(baud,br2x) - min(baud,br2x) ){
+        UBRR1 = ubbr; // set UART baud rate
+        } else {
+        UBRR1 = ubbr2x;
+        bitSet(UCSR1A, U2X1);
+    }
+    // Another way to put it: if br and br2x are equal, choose the one with the highest stability (without U2X),
+    // else choose the closest to the mark (and it will necessarily be the one with U2X).
+
+    // enable RX and RX interrupt, disable TX and all TX interrupt
+    UCSR1B = ((1 << RXCIE1) | (1 << RXEN1));
+}
+
 /** Configures the board hardware and chip peripherals for the demo's functionality. */
 void SetupHardware(void)
 {
-#if (ARCH == ARCH_AVR8)
 	/* Disable watchdog if enabled by bootloader/fuses */
 	MCUSR &= ~(1 << WDRF);
 	wdt_disable();
 
 	/* Disable clock division */
 	clock_prescale_set(clock_div_1);
-#elif (ARCH == ARCH_XMEGA)
-	/* Start the PLL to multiply the 2MHz RC oscillator to 32MHz and switch the CPU core to run from it */
-	XMEGACLK_StartPLL(CLOCK_SRC_INT_RC2MHZ, 2000000, F_CPU);
-	XMEGACLK_SetCPUClockSource(CLOCK_SRC_PLL);
-
-	/* Start the 32MHz internal RC oscillator and start the DFLL to increase it to 48MHz using the USB SOF as a reference */
-	XMEGACLK_StartInternalOscillator(CLOCK_SRC_INT_RC32MHZ);
-	XMEGACLK_StartDFLL(CLOCK_SRC_INT_RC32MHZ, DFLL_REF_INT_USBSOF, F_USB);
-
-	PMIC.CTRL = PMIC_LOLVLEN_bm | PMIC_MEDLVLEN_bm | PMIC_HILVLEN_bm;
-#endif
 
 	/* Hardware Initialization */
-	Joystick_Init();
-	LEDs_Init();
+	//LEDs_Init();
 	USB_Init();
 }
 
-/** Checks for changes in the position of the board joystick, sending strings to the host upon each change. */
-void CheckJoystickMovement(void)
-{
-	uint8_t     JoyStatus_LCL = Joystick_GetStatus();
-	char*       ReportString  = NULL;
-	static bool ActionSent    = false;
 
-	if (JoyStatus_LCL & JOY_UP)
-	  ReportString = "Joystick Up\r\n";
-	else if (JoyStatus_LCL & JOY_DOWN)
-	  ReportString = "Joystick Down\r\n";
-	else if (JoyStatus_LCL & JOY_LEFT)
-	  ReportString = "Joystick Left\r\n";
-	else if (JoyStatus_LCL & JOY_RIGHT)
-	  ReportString = "Joystick Right\r\n";
-	else if (JoyStatus_LCL & JOY_PRESS)
-	  ReportString = "Joystick Pressed\r\n";
-	else
-	  ActionSent = false;
 
-	if ((ReportString != NULL) && (ActionSent == false))
-	{
-		ActionSent = true;
 
-		/* Write the string to the virtual COM port via the created character stream */
-		fputs(ReportString, &USBSerialStream);
 
-		/* Alternatively, without the stream: */
-		// CDC_Device_SendString(&VirtualSerial_CDC_Interface, ReportString);
-	}
-}
+
 
 /** Event handler for the library USB Connection event. */
 void EVENT_USB_Device_Connect(void)
@@ -176,7 +172,7 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 
 	ConfigSuccess &= CDC_Device_ConfigureEndpoints(&VirtualSerial_CDC_Interface);
 
-	LEDs_SetAllLEDs(ConfigSuccess ? LEDMASK_USB_READY : LEDMASK_USB_ERROR);
+	//LEDs_SetAllLEDs(ConfigSuccess ? LEDMASK_USB_READY : LEDMASK_USB_ERROR);
 }
 
 /** Event handler for the library USB Control Request reception event. */
@@ -184,4 +180,45 @@ void EVENT_USB_Device_ControlRequest(void)
 {
 	CDC_Device_ProcessControlRequest(&VirtualSerial_CDC_Interface);
 }
+
+/** Event handler for the CDC Class driver Line Encoding Changed event.
+ *
+ *  \param[in] CDCInterfaceInfo  Pointer to the CDC class interface configuration structure being referenced
+ */
+void EVENT_CDC_Device_LineEncodingChanged(USB_ClassInfo_CDC_Device_t* const CDCInterfaceInfo){
+    // Set the baud rate, ignore the rest of the configuration (parity, char format, number of bits in a byte) since the servos only understand 8N1
+
+    init_serial(CDCInterfaceInfo->State.LineEncoding.BaudRateBPS);
+    
+    // If the baudrate is at this special (and unlikely) value, it means that we want to trigger the bootloader
+    if (CDCInterfaceInfo->State.LineEncoding.BaudRateBPS == 1200){
+        needs_bootload = true;
+    }
+}
+    
+
+
+// *********************  Soft reset/bootloader functionality *******************************************
+// The bootloader can be ran by opening the serial port at 1200bps. Upon closing it, the reset process will be initiated
+// and two seconds later, the board will re-enumerate as a DFU bootloader.
+
+
+// adapted from http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&p=1008792#1008792
+void EVENT_CDC_Device_ControLineStateChanged(USB_ClassInfo_CDC_Device_t* const CDCInterfaceInfo){
+    static bool PreviousDTRState = false;
+    bool        CurrentDTRState  = (CDCInterfaceInfo->State.ControlLineStates.HostToDevice & CDC_CONTROL_LINE_OUT_DTR);
+
+    /* Check how the DTR line has been asserted */
+    if (PreviousDTRState && !(CurrentDTRState) ){
+        // PreviousDTRState == True AND CurrentDTRState == False
+        // Host application has Disconnected from the COM port
+        
+        if (needs_bootload){
+            Jump_To_Reset(true);
+        }
+    }
+    PreviousDTRState = CurrentDTRState;
+}
+// ******************************************************************************************************
+
 

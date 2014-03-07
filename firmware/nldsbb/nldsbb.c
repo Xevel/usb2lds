@@ -16,11 +16,11 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
+#include <nlds/nlds.h>
+
 #define bitSet(value, bit)       ((value) |= (1UL << (bit)))
 #define bitClear(value, bit)     ((value) &= ~(1UL << (bit)))
 
-volatile uint16_t volatile_rpm;
-volatile uint8_t rpm_updated;
 
 
 #if DEBUG 
@@ -111,9 +111,9 @@ int main(void)
     while(1)
     {
         cli();
-        if (rpm_updated){
-            rpm = volatile_rpm;
-            rpm_updated = 0;
+        if (nlds_rpm_updated_get()){
+            rpm = nlds_rpm_get();
+            nlds_rpm_updated_clear();
             has_new_rpm_value = 1;
             
             nb_cnt++;
@@ -150,100 +150,13 @@ int main(void)
     }
 }
 
-
-typedef enum {
-    SEARCH_START = 0,
-    GET_ID = 1,
-    GET_RPM_L = 2,
-    GET_RPM_H = 3,
-    GET_DATA_L = 4,
-    GET_DATA_H = 5,
-    GET_CHECKSUM_L = 6,
-    GET_CHECKSUM_H = 7
-} state_t ;
-
-state_t state;
-uint8_t id;
-uint32_t accumulator;
-uint16_t checksum;
-uint8_t nb_data;
-uint16_t rpm_tmp;
-uint16_t data;
-
 ISR(USART_RX_vect)
 {
-    //dbup1;
     uint8_t c = UDR;
-    sei(); // once incoming data hs been read, we can release the interrupts
+    sei(); // once incoming data has been read, we can release the interrupts
 
-    // parse to find the speed the LDS is turning at
-    switch(state){
-        case SEARCH_START:
-            if (c == 0xFA){
-                state = GET_ID;
-            }
-            break;
-        case GET_ID:
-            if ( c >= 0xA0 && c <= 0xF9 ){ // ID is supposed to be in this bracket
-                id = c;
-                accumulator = 0xFA + ((uint16_t)id << 8);
-                state = GET_RPM_L;
-            } else if ( c != 0xFA ){ // if it's not and it's not the start byte either, go back to the start
-                state = SEARCH_START;
-            } // else it's the start byte and we stay in the same state
-            break;
-        case GET_RPM_L:
-            rpm_tmp = c;
-            state = GET_RPM_H;
-            break;
-        case GET_RPM_H:
-            rpm_tmp |= (uint16_t)c << 8;
-            nb_data = 2;
-            accumulator = (accumulator << 1) + rpm_tmp;
-            state = GET_DATA_L;
-            break;
-        case GET_DATA_L:
-            data = c;
-            state = GET_DATA_H;
-            break;
-        case GET_DATA_H:
-            data |= (uint16_t)c << 8;
-            accumulator = (accumulator << 1) + data;
+    nlds_parse(c);
 
-            nb_data++;
-            if (nb_data >= 10){
-                state = GET_CHECKSUM_L;
-            } else {
-                state = GET_DATA_L;
-            }
-            break;
-        case GET_CHECKSUM_L:
-            checksum = c;
-            state = GET_CHECKSUM_H;
-            break;
-        case GET_CHECKSUM_H:
-            checksum |= ((uint16_t)c << 8);
-            
-            accumulator = (accumulator & 0x7FFF) + (accumulator >> 15);
-            accumulator = accumulator & 0x7FFF;
-
-            if (accumulator == checksum){
-                volatile_rpm = rpm_tmp;
-                rpm_updated = 1;
-            }
-            state = SEARCH_START;
-            break;
-        default:
-            break;
-    }
-
-    //for (uint8_t i = 0; i < state; i++){
-        //dbdown1;
-        //dbup1;
-    //}
-    
-    //dbdown1;
 }
-
 
 

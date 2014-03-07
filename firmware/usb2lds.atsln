@@ -5,6 +5,10 @@ Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "usb2lds", "usb2lds\usb2lds.
 EndProject
 Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "nldsbb", "nldsbb\nldsbb.cproj", "{E3D84D05-2A27-4885-B675-D7AB0F0A1DA1}"
 EndProject
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "nlds_atmega32u2", "nlds\nlds_atmega32u2.cproj", "{89FBC941-3F54-49ED-9850-BEACCD2C2082}"
+EndProject
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "nlds_attiny2313A", "nlds\nlds_attiny2313A.cproj", "{CC73645E-05AF-4B02-9F19-633835B7844F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|AVR = Debug|AVR
@@ -19,6 +23,14 @@ Global
 		{E3D84D05-2A27-4885-B675-D7AB0F0A1DA1}.Debug|AVR.Build.0 = Debug|AVR
 		{E3D84D05-2A27-4885-B675-D7AB0F0A1DA1}.Release|AVR.ActiveCfg = Release|AVR
 		{E3D84D05-2A27-4885-B675-D7AB0F0A1DA1}.Release|AVR.Build.0 = Release|AVR
+		{89FBC941-3F54-49ED-9850-BEACCD2C2082}.Debug|AVR.ActiveCfg = Debug|AVR
+		{89FBC941-3F54-49ED-9850-BEACCD2C2082}.Debug|AVR.Build.0 = Debug|AVR
+		{89FBC941-3F54-49ED-9850-BEACCD2C2082}.Release|AVR.ActiveCfg = Release|AVR
+		{89FBC941-3F54-49ED-9850-BEACCD2C2082}.Release|AVR.Build.0 = Release|AVR
+		{CC73645E-05AF-4B02-9F19-633835B7844F}.Debug|AVR.ActiveCfg = Debug|AVR
+		{CC73645E-05AF-4B02-9F19-633835B7844F}.Debug|AVR.Build.0 = Debug|AVR
+		{CC73645E-05AF-4B02-9F19-633835B7844F}.Release|AVR.ActiveCfg = Release|AVR
+		{CC73645E-05AF-4B02-9F19-633835B7844F}.Release|AVR.Build.0 = Release|AVR
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

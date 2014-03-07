@@ -41,15 +41,19 @@
 		#include <avr/wdt.h>
 		#include <avr/power.h>
 		#include <avr/interrupt.h>
-		#include <string.h>
 		#include <stdio.h>
 
 		#include "Descriptors.h"
 
 		#include <LUFA/Drivers/Board/LEDs.h>
-		#include <LUFA/Drivers/Board/Joystick.h>
+        #include <LUFA/Drivers/Peripheral/Serial.h>
 		#include <LUFA/Drivers/USB/USB.h>
 		#include <LUFA/Platform/Platform.h>
+
+        #define bitSet(value, bit)       ((value) |= (1UL << (bit)))
+        #define bitClear(value, bit)     ((value) &= ~(1UL << (bit)))
+        #define min(x,y)                 ( ((x)<(y)) ? (x) : (y) )
+        #define max(x,y)                 ( ((x)>(y)) ? (x) : (y) )
 
 	/* Macros: */
 		/** LED mask for the library LED driver, to indicate that the USB interface is not ready. */
