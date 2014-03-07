@@ -1,5 +1,7 @@
 /*
- * NLDSBB_firmware.c
+ * nldsbb.c
+ *
+ * Firmware for the Neato LDS Breakout Board
  *
  * Created: 19/02/2014 22:11:16
  *  Author: Xevel
@@ -20,7 +22,6 @@
 volatile uint16_t volatile_rpm;
 volatile uint8_t rpm_updated;
 
-#define DEBUG   (1)
 
 #if DEBUG 
 #define dbinit1     bitSet(DDRD , 2)

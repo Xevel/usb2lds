@@ -12,9 +12,9 @@
     <OutputFileName>$(MSBuildProjectName)</OutputFileName>
     <OutputFileExtension>.elf</OutputFileExtension>
     <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
-    <AssemblyName>NLDSBB firmware</AssemblyName>
-    <Name>NLDSBB firmware</Name>
-    <RootNamespace>NLDSBB firmware</RootNamespace>
+    <AssemblyName>nldsbb</AssemblyName>
+    <Name>nldsbb</Name>
+    <RootNamespace>nldsbb</RootNamespace>
     <ToolchainFlavour>Native</ToolchainFlavour>
     <KeepTimersRunning>true</KeepTimersRunning>
     <OverrideVtor>false</OverrideVtor>
@@ -50,7 +50,8 @@
       <ToolNumber>00A200035739</ToolNumber>
       <ToolName>AVR Dragon</ToolName>
     </com_atmel_avrdbg_tool_avrdragon>
-    <avrtoolinterface>ISP</avrtoolinterface>
+    <avrtoolinterface>
+    </avrtoolinterface>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
@@ -107,7 +108,7 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="NLDSBB firmware.c">
+    <Compile Include="nldsbb.c">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>
