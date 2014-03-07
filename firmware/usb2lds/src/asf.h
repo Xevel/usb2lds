@@ -58,15 +58,15 @@
 // From module: LUFA Board Hardware Information Driver
 #include <LUFA/Drivers/Board/Board.h>
 
-// From module: LUFA Board LED Driver
-#include <LUFA/Drivers/Board/LEDs.h>
-
 // From module: LUFA Common Infrastructure
 #include <LUFA/Common/Common.h>
 #include <LUFA/Version.h>
 
 // From module: LUFA Platform Specific Support - AVR8
 #include <LUFA/Platform/Platform.h>
+
+// From module: LUFA Ring Buffer
+#include <LUFA/Drivers/Misc/RingBuffer.h>
 
 // From module: LUFA USART Driver - AVR8
 #include <LUFA/Drivers/Peripheral/Serial.h>

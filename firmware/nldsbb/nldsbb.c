@@ -60,7 +60,7 @@ uint8_t mot_should_run(){
 uint16_t rpm;
 uint8_t has_new_rpm_value;
 
-void usart_setup(){
+void usart_setup(){ // Usart at 115200, 8N1
     cli();
     UCSRA = (1<<U2X); // x2
     UBRRL = 16; // cf datasheet p144
@@ -69,8 +69,8 @@ void usart_setup(){
 }
 
 void usart_write(uint8_t data){ // for debug, the pin is left unconnected
-loop_until_bit_is_set(UCSRA, UDRE);
-UDR = data;
+    loop_until_bit_is_set(UCSRA, UDRE);
+    UDR = data;
 }
 
 int16_t rpm_setpoint = 19200; //speed is expressed in 64th of rpm (6 bit shift) and we want it to turn at 300 rpm (= 5 rotation/s)
@@ -121,6 +121,9 @@ int main(void)
             //dbdown1;
         }
         sei();
+
+
+        // TODO fix the algorithm, it's currently an integral controller !!! 
         if (has_new_rpm_value && nb_cnt == 60){
             //usart_write(rpm >> 7);
             nb_cnt = 0;
@@ -156,7 +159,6 @@ ISR(USART_RX_vect)
     sei(); // once incoming data has been read, we can release the interrupts
 
     nlds_parse(c);
-
 }
 
 

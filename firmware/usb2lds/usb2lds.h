@@ -45,37 +45,40 @@
 
 		#include "Descriptors.h"
 
-		#include <LUFA/Drivers/Board/LEDs.h>
-        #include <LUFA/Drivers/Peripheral/Serial.h>
+		#include <LUFA/Drivers/Peripheral/Serial.h>
+		#include <LUFA/Drivers/Misc/RingBuffer.h>
 		#include <LUFA/Drivers/USB/USB.h>
 		#include <LUFA/Platform/Platform.h>
 
         #define bitSet(value, bit)       ((value) |= (1UL << (bit)))
         #define bitClear(value, bit)     ((value) &= ~(1UL << (bit)))
-        #define min(x,y)                 ( ((x)<(y)) ? (x) : (y) )
-        #define max(x,y)                 ( ((x)>(y)) ? (x) : (y) )
 
 	/* Macros: */
-		/** LED mask for the library LED driver, to indicate that the USB interface is not ready. */
-		#define LEDMASK_USB_NOTREADY      LEDS_LED1
-
-		/** LED mask for the library LED driver, to indicate that the USB interface is enumerating. */
-		#define LEDMASK_USB_ENUMERATING  (LEDS_LED2 | LEDS_LED3)
-
-		/** LED mask for the library LED driver, to indicate that the USB interface is ready. */
-		#define LEDMASK_USB_READY        (LEDS_LED2 | LEDS_LED4)
-
-		/** LED mask for the library LED driver, to indicate that an error has occurred in the USB interface. */
-		#define LEDMASK_USB_ERROR        (LEDS_LED1 | LEDS_LED3)
+		///** LED mask for the library LED driver, to indicate that the USB interface is not ready. */
+		//#define LEDMASK_USB_NOTREADY      LEDS_LED1
+//
+		///** LED mask for the library LED driver, to indicate that the USB interface is enumerating. */
+		//#define LEDMASK_USB_ENUMERATING  (LEDS_LED2 | LEDS_LED3)
+//
+		///** LED mask for the library LED driver, to indicate that the USB interface is ready. */
+		//#define LEDMASK_USB_READY        (LEDS_LED2 | LEDS_LED4)
+//
+		///** LED mask for the library LED driver, to indicate that an error has occurred in the USB interface. */
+		//#define LEDMASK_USB_ERROR        (LEDS_LED1 | LEDS_LED3)
 
 	/* Function Prototypes: */
 		void SetupHardware(void);
-		void CheckJoystickMovement(void);
+
+        void usart_setup();
+        void apply_motor_pwm(uint8_t val);
+
 
 		void EVENT_USB_Device_Connect(void);
 		void EVENT_USB_Device_Disconnect(void);
 		void EVENT_USB_Device_ConfigurationChanged(void);
 		void EVENT_USB_Device_ControlRequest(void);
+        void EVENT_CDC_Device_LineEncodingChanged(USB_ClassInfo_CDC_Device_t* const CDCInterfaceInfo);
+        void EVENT_CDC_Device_ControLineStateChanged(USB_ClassInfo_CDC_Device_t* const CDCInterfaceInfo);
 
 #endif
 

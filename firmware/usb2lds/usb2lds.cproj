@@ -28,9 +28,9 @@
     <AsfFrameworkConfig>
       <framework-data>
   <options>
-    <option id="lufa.drivers.board.leds" value="Add" config="" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <option id="lufa.drivers.peripheral.usart" value="Add" config="" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <option id="lufa.drivers.board" value="Add" config="none" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
+    <option id="lufa.drivers.misc.ringbuffer" value="Add" config="" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
+    <option id="lufa.drivers.peripheral.usart" value="Add" config="" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <option id="lufa.drivers.usb" value="Add" config="" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <option id="lufa.platform" value="Add" config="" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <option id="lufa.common" value="Add" config="" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
@@ -38,15 +38,15 @@
   </options>
   <configurations>
     <configuration key="lufa.drivers.board.name" value="none" default="none" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <configuration key="lufa.drivers.usb.class.android.mode" value="host" default="host" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <configuration key="lufa.drivers.usb.class.audio.mode" value="host_device" default="host_device" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <configuration key="lufa.drivers.usb.class.cdc.mode" value="host_device" default="host_device" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <configuration key="lufa.drivers.usb.class.hid.mode" value="host_device" default="host_device" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <configuration key="lufa.drivers.usb.class.ms.mode" value="host_device" default="host_device" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <configuration key="lufa.drivers.usb.class.midi.mode" value="host_device" default="host_device" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <configuration key="lufa.drivers.usb.class.printer.mode" value="host_device" default="host_device" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <configuration key="lufa.drivers.usb.class.rndis.mode" value="host_device" default="host_device" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <configuration key="lufa.drivers.usb.class.si.mode" value="host" default="host" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
+    <configuration key="lufa.drivers.usb.class.android.mode" value="definitions_only" default="host" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
+    <configuration key="lufa.drivers.usb.class.audio.mode" value="definitions_only" default="host_device" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
+    <configuration key="lufa.drivers.usb.class.cdc.mode" value="device" default="host_device" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
+    <configuration key="lufa.drivers.usb.class.hid.mode" value="definitions_only" default="host_device" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
+    <configuration key="lufa.drivers.usb.class.ms.mode" value="definitions_only" default="host_device" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
+    <configuration key="lufa.drivers.usb.class.midi.mode" value="definitions_only" default="host_device" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
+    <configuration key="lufa.drivers.usb.class.printer.mode" value="definitions_only" default="host_device" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
+    <configuration key="lufa.drivers.usb.class.rndis.mode" value="definitions_only" default="host_device" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
+    <configuration key="lufa.drivers.usb.class.si.mode" value="definitions_only" default="host" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
   </configurations>
   <files>
     <file path="src/config/LUFAConfig.h" framework="" version="" source="Demos/Device/ClassDriver/VirtualSerial/Config/LUFAConfig.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
@@ -64,7 +64,6 @@
     <file path="src/LUFA/LUFA/Common/CompilerSpecific.h" framework="" version="" source="LUFA/Common/CompilerSpecific.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Common/Endianness.h" framework="" version="" source="LUFA/Common/Endianness.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/Board/Board.h" framework="" version="" source="LUFA/Drivers/Board/Board.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <file path="src/LUFA/LUFA/Drivers/Board/LEDs.h" framework="" version="" source="LUFA/Drivers/Board/LEDs.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/AndroidAccessoryClass.h" framework="" version="" source="LUFA/Drivers/USB/Class/AndroidAccessoryClass.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/AudioClass.h" framework="" version="" source="LUFA/Drivers/USB/Class/AudioClass.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/CDCClass.h" framework="" version="" source="LUFA/Drivers/USB/Class/CDCClass.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
@@ -80,38 +79,23 @@
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Common/PrinterClassCommon.h" framework="" version="" source="LUFA/Drivers/USB/Class/Common/PrinterClassCommon.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Common/RNDISClassCommon.h" framework="" version="" source="LUFA/Drivers/USB/Class/Common/RNDISClassCommon.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Common/StillImageClassCommon.h" framework="" version="" source="LUFA/Drivers/USB/Class/Common/StillImageClassCommon.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <file path="src/LUFA/LUFA/Drivers/USB/Class/Device/AudioClassDevice.c" framework="" version="" source="LUFA/Drivers/USB/Class/Device/AudioClassDevice.c" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Device/AudioClassDevice.h" framework="" version="" source="LUFA/Drivers/USB/Class/Device/AudioClassDevice.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Device/CDCClassDevice.c" framework="" version="" source="LUFA/Drivers/USB/Class/Device/CDCClassDevice.c" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Device/CDCClassDevice.h" framework="" version="" source="LUFA/Drivers/USB/Class/Device/CDCClassDevice.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <file path="src/LUFA/LUFA/Drivers/USB/Class/Device/HIDClassDevice.c" framework="" version="" source="LUFA/Drivers/USB/Class/Device/HIDClassDevice.c" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Device/HIDClassDevice.h" framework="" version="" source="LUFA/Drivers/USB/Class/Device/HIDClassDevice.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <file path="src/LUFA/LUFA/Drivers/USB/Class/Device/MIDIClassDevice.c" framework="" version="" source="LUFA/Drivers/USB/Class/Device/MIDIClassDevice.c" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Device/MIDIClassDevice.h" framework="" version="" source="LUFA/Drivers/USB/Class/Device/MIDIClassDevice.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <file path="src/LUFA/LUFA/Drivers/USB/Class/Device/MassStorageClassDevice.c" framework="" version="" source="LUFA/Drivers/USB/Class/Device/MassStorageClassDevice.c" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Device/MassStorageClassDevice.h" framework="" version="" source="LUFA/Drivers/USB/Class/Device/MassStorageClassDevice.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <file path="src/LUFA/LUFA/Drivers/USB/Class/Device/PrinterClassDevice.c" framework="" version="" source="LUFA/Drivers/USB/Class/Device/PrinterClassDevice.c" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Device/PrinterClassDevice.h" framework="" version="" source="LUFA/Drivers/USB/Class/Device/PrinterClassDevice.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <file path="src/LUFA/LUFA/Drivers/USB/Class/Device/RNDISClassDevice.c" framework="" version="" source="LUFA/Drivers/USB/Class/Device/RNDISClassDevice.c" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Device/RNDISClassDevice.h" framework="" version="" source="LUFA/Drivers/USB/Class/Device/RNDISClassDevice.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/HIDClass.h" framework="" version="" source="LUFA/Drivers/USB/Class/HIDClass.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/AndroidAccessoryClassHost.c" framework="" version="" source="LUFA/Drivers/USB/Class/Host/AndroidAccessoryClassHost.c" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/AndroidAccessoryClassHost.h" framework="" version="" source="LUFA/Drivers/USB/Class/Host/AndroidAccessoryClassHost.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/AudioClassHost.c" framework="" version="" source="LUFA/Drivers/USB/Class/Host/AudioClassHost.c" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/AudioClassHost.h" framework="" version="" source="LUFA/Drivers/USB/Class/Host/AudioClassHost.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/CDCClassHost.c" framework="" version="" source="LUFA/Drivers/USB/Class/Host/CDCClassHost.c" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/CDCClassHost.h" framework="" version="" source="LUFA/Drivers/USB/Class/Host/CDCClassHost.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/HIDClassHost.c" framework="" version="" source="LUFA/Drivers/USB/Class/Host/HIDClassHost.c" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/HIDClassHost.h" framework="" version="" source="LUFA/Drivers/USB/Class/Host/HIDClassHost.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/MIDIClassHost.c" framework="" version="" source="LUFA/Drivers/USB/Class/Host/MIDIClassHost.c" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/MIDIClassHost.h" framework="" version="" source="LUFA/Drivers/USB/Class/Host/MIDIClassHost.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/MassStorageClassHost.c" framework="" version="" source="LUFA/Drivers/USB/Class/Host/MassStorageClassHost.c" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/MassStorageClassHost.h" framework="" version="" source="LUFA/Drivers/USB/Class/Host/MassStorageClassHost.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/PrinterClassHost.c" framework="" version="" source="LUFA/Drivers/USB/Class/Host/PrinterClassHost.c" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/PrinterClassHost.h" framework="" version="" source="LUFA/Drivers/USB/Class/Host/PrinterClassHost.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/RNDISClassHost.c" framework="" version="" source="LUFA/Drivers/USB/Class/Host/RNDISClassHost.c" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/RNDISClassHost.h" framework="" version="" source="LUFA/Drivers/USB/Class/Host/RNDISClassHost.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
-    <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/StillImageClassHost.c" framework="" version="" source="LUFA/Drivers/USB/Class/Host/StillImageClassHost.c" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/Host/StillImageClassHost.h" framework="" version="" source="LUFA/Drivers/USB/Class/Host/StillImageClassHost.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/MIDIClass.h" framework="" version="" source="LUFA/Drivers/USB/Class/MIDIClass.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/USB/Class/MassStorageClass.h" framework="" version="" source="LUFA/Drivers/USB/Class/MassStorageClass.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
@@ -169,12 +153,12 @@
     <file path="src/LUFA/LUFA/Drivers/Peripheral/AVR8/Serial_AVR8.c" framework="" version="13.09.01" source="LUFA\Drivers\Peripheral\AVR8\Serial_AVR8.c" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/Peripheral/AVR8/Serial_AVR8.h" framework="" version="13.09.01" source="LUFA\Drivers\Peripheral\AVR8\Serial_AVR8.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
     <file path="src/LUFA/LUFA/Drivers/Peripheral/Serial.h" framework="" version="13.09.01" source="LUFA\Drivers\Peripheral\Serial.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
+    <file path="src/LUFA/LUFA/Drivers/Misc/RingBuffer.h" framework="" version="13.09.01" source="LUFA\Drivers\Misc\RingBuffer.h" changed="False" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
   </files>
   <documentation help="" />
   <offline-documentation help="" />
   <dependencies>
     <content-extension eid="0e160d5c-e331-48d9-850b-e0387912171b" uuidref="0e160d5c-e331-48d9-850b-e0387912171b" version="13.09.01" />
-    <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.11.0" />
   </dependencies>
   <project id="lufa.demos.device.class.cdc.example.avr8" value="Add" config="" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
   <board id="lufa.boards.dummy.avr8" value="Add" config="" content-id="0e160d5c-e331-48d9-850b-e0387912171b" />
@@ -208,6 +192,7 @@
       <Value>../src/LUFA</Value>
       <Value>../src/config</Value>
       <Value>../src/LUFA/.</Value>
+      <Value>../..</Value>
     </ListValues>
   </avrgcc.compiler.directories.IncludePaths>
   <avrgcc.compiler.optimization.level>Optimize for size (-Os)</avrgcc.compiler.optimization.level>
@@ -236,54 +221,54 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <ToolchainSettings>
       <AvrGcc>
-  <avrgcc.common.optimization.RelaxBranches>True</avrgcc.common.optimization.RelaxBranches>
-  <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
-  <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
-  <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
-  <avrgcc.common.outputfiles.srec>True</avrgcc.common.outputfiles.srec>
-  <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
-  <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
-  <avrgcc.compiler.symbols.DefSymbols>
-    <ListValues>
-      <Value>DEBUG</Value>
-      <Value>ARCH=ARCH_AVR8</Value>
-      <Value>BOARD=BOARD_NONE</Value>
-      <Value>F_CPU=16000000UL</Value>
-      <Value>USE_LUFA_CONFIG_HEADER</Value>
-      <Value>F_USB=16000000UL</Value>
-    </ListValues>
-  </avrgcc.compiler.symbols.DefSymbols>
-  <avrgcc.compiler.directories.IncludePaths>
-    <ListValues>
-      <Value>../src</Value>
-      <Value>../src/LUFA</Value>
-      <Value>../src/config</Value>
-      <Value>../src/LUFA/.</Value>
-    </ListValues>
-  </avrgcc.compiler.directories.IncludePaths>
-  <avrgcc.compiler.optimization.level>Optimize (-O1)</avrgcc.compiler.optimization.level>
-  <avrgcc.compiler.optimization.OtherFlags>-fdata-sections</avrgcc.compiler.optimization.OtherFlags>
-  <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
-  <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
-  <avrgcc.compiler.optimization.DebugLevel>Maximum (-g3)</avrgcc.compiler.optimization.DebugLevel>
-  <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
-  <avrgcc.compiler.miscellaneous.OtherFlags>-mrelax -std=gnu99 -fno-strict-aliasing</avrgcc.compiler.miscellaneous.OtherFlags>
-  <avrgcc.linker.libraries.Libraries>
-    <ListValues>
-      <Value>libm</Value>
-    </ListValues>
-  </avrgcc.linker.libraries.Libraries>
-  <avrgcc.assembler.general.AssemblerFlags>-DARCH=ARCH_AVR8 -DBOARD=BOARD_NONE -DF_CPU=16000000UL -DF_USB=16000000UL -DUSE_LUFA_CONFIG_HEADER</avrgcc.assembler.general.AssemblerFlags>
-  <avrgcc.assembler.general.IncludePaths>
-    <ListValues>
-      <Value>../src</Value>
-      <Value>../src/LUFA</Value>
-      <Value>../src/config</Value>
-      <Value>../src/LUFA/.</Value>
-    </ListValues>
-  </avrgcc.assembler.general.IncludePaths>
-  <avrgcc.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcc.assembler.debugging.DebugLevel>
-</AvrGcc>
+        <avrgcc.common.optimization.RelaxBranches>True</avrgcc.common.optimization.RelaxBranches>
+        <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
+        <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
+        <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
+        <avrgcc.common.outputfiles.srec>True</avrgcc.common.outputfiles.srec>
+        <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
+        <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
+        <avrgcc.compiler.symbols.DefSymbols>
+          <ListValues>
+            <Value>DEBUG</Value>
+            <Value>ARCH=ARCH_AVR8</Value>
+            <Value>BOARD=BOARD_NONE</Value>
+            <Value>F_CPU=16000000UL</Value>
+            <Value>USE_LUFA_CONFIG_HEADER</Value>
+            <Value>F_USB=16000000UL</Value>
+          </ListValues>
+        </avrgcc.compiler.symbols.DefSymbols>
+        <avrgcc.compiler.directories.IncludePaths>
+          <ListValues>
+            <Value>../src</Value>
+            <Value>../src/LUFA</Value>
+            <Value>../src/config</Value>
+            <Value>../src/LUFA/.</Value>
+          </ListValues>
+        </avrgcc.compiler.directories.IncludePaths>
+        <avrgcc.compiler.optimization.level>Optimize (-O1)</avrgcc.compiler.optimization.level>
+        <avrgcc.compiler.optimization.OtherFlags>-fdata-sections</avrgcc.compiler.optimization.OtherFlags>
+        <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
+        <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
+        <avrgcc.compiler.optimization.DebugLevel>Maximum (-g3)</avrgcc.compiler.optimization.DebugLevel>
+        <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
+        <avrgcc.compiler.miscellaneous.OtherFlags>-mrelax -std=gnu99 -fno-strict-aliasing</avrgcc.compiler.miscellaneous.OtherFlags>
+        <avrgcc.linker.libraries.Libraries>
+          <ListValues>
+            <Value>libm</Value>
+          </ListValues>
+        </avrgcc.linker.libraries.Libraries>
+        <avrgcc.assembler.general.AssemblerFlags>-DARCH=ARCH_AVR8 -DBOARD=BOARD_NONE -DF_CPU=16000000UL -DF_USB=16000000UL -DUSE_LUFA_CONFIG_HEADER</avrgcc.assembler.general.AssemblerFlags>
+        <avrgcc.assembler.general.IncludePaths>
+          <ListValues>
+            <Value>../src</Value>
+            <Value>../src/LUFA</Value>
+            <Value>../src/config</Value>
+            <Value>../src/LUFA/.</Value>
+          </ListValues>
+        </avrgcc.assembler.general.IncludePaths>
+        <avrgcc.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcc.assembler.debugging.DebugLevel>
+      </AvrGcc>
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
@@ -318,6 +303,9 @@
       <SubType>compile</SubType>
     </Compile>
     <None Include="src\LUFA\LUFA\Drivers\Misc\TerminalCodes.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\LUFA\LUFA\Drivers\Misc\RingBuffer.h">
       <SubType>compile</SubType>
     </None>
     <Compile Include="src\LUFA\LUFA\Drivers\Peripheral\AVR8\Serial_AVR8.c">
@@ -372,9 +360,6 @@
       <SubType>compile</SubType>
     </None>
     <None Include="src\LUFA\LUFA\Drivers\USB\Core\USBMode.h">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="src\LUFA\LUFA\Drivers\Board\LEDs.h">
       <SubType>compile</SubType>
     </None>
     <None Include="src\LUFA\LUFA\Drivers\USB\Core\Device.h">
@@ -572,52 +557,7 @@
     <Compile Include="src\LUFA\LUFA\Drivers\USB\Class\Common\HIDParser.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\LUFA\LUFA\Drivers\USB\Class\Device\AudioClassDevice.c">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="src\LUFA\LUFA\Drivers\USB\Class\Device\CDCClassDevice.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\LUFA\LUFA\Drivers\USB\Class\Device\HIDClassDevice.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\LUFA\LUFA\Drivers\USB\Class\Device\MassStorageClassDevice.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\LUFA\LUFA\Drivers\USB\Class\Device\MIDIClassDevice.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\LUFA\LUFA\Drivers\USB\Class\Device\PrinterClassDevice.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\LUFA\LUFA\Drivers\USB\Class\Device\RNDISClassDevice.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\LUFA\LUFA\Drivers\USB\Class\Host\AndroidAccessoryClassHost.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\LUFA\LUFA\Drivers\USB\Class\Host\AudioClassHost.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\LUFA\LUFA\Drivers\USB\Class\Host\CDCClassHost.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\LUFA\LUFA\Drivers\USB\Class\Host\HIDClassHost.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\LUFA\LUFA\Drivers\USB\Class\Host\MassStorageClassHost.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\LUFA\LUFA\Drivers\USB\Class\Host\MIDIClassHost.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\LUFA\LUFA\Drivers\USB\Class\Host\PrinterClassHost.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\LUFA\LUFA\Drivers\USB\Class\Host\RNDISClassHost.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\LUFA\LUFA\Drivers\USB\Class\Host\StillImageClassHost.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\LUFA\LUFA\Drivers\USB\Core\AVR8\Device_AVR8.c">
