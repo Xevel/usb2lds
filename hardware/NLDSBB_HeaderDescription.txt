@@ -1,0 +1,21 @@
+
+
+
+Header of FTDI cable, interpreted from FTDI side.
+GND: common ground
+CTS: doit etre mise a GND par la cible
+VCC: fournit 5V a la cible
+TXD: envoi des char à la cible, doit être connecté au RXI de la cible
+RXD: recoi les char de la cible, doit être connecté au TXO de la cible
+RTS: output qui dit quand le FTDI est pret a recevoir. Laissé non connecté du coté cible si elle n'est pas capable de réguler son flux.
+
+
+Header, from the board perspective:
+GND : common ground
+/MOT: connected to CTS, it can be controlled by the host to turn the motor ON (LOW or not connected) or OFF (HIGH)
+VIN : power input, 5V
+RXI : RX Input, goes directly to the LDS. This can be used by the host to send commands to the LDS, preferably when the motor is stopped.
+TXO : TX output, comes directly from the LDS. That's where the info from the sensor will be avaialable for the host to read.
+NC  : not connected
+
+Only GND, VIN and TXO are necessary to read the info from the LDS.

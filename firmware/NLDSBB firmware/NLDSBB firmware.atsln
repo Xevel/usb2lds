@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "NLDSBB firmware", "NLDSBB firmware\NLDSBB firmware.cproj", "{E3D84D05-2A27-4885-B675-D7AB0F0A1DA1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E3D84D05-2A27-4885-B675-D7AB0F0A1DA1}.Debug|AVR.ActiveCfg = Debug|AVR
+		{E3D84D05-2A27-4885-B675-D7AB0F0A1DA1}.Debug|AVR.Build.0 = Debug|AVR
+		{E3D84D05-2A27-4885-B675-D7AB0F0A1DA1}.Release|AVR.ActiveCfg = Release|AVR
+		{E3D84D05-2A27-4885-B675-D7AB0F0A1DA1}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
