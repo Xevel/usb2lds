@@ -359,6 +359,11 @@ int main(void)
                         display_mode = DISPLAY_VALUES;
                         show_display();
                         break;
+
+
+                    case ' ': // to make the motor spin whatever the computations
+                        motor_pwm = 200;
+                        break;
                 }
             }
 
@@ -588,6 +593,7 @@ void EVENT_CDC_Device_ControLineStateChanged(USB_ClassInfo_CDC_Device_t* const C
         // Host application has Disconnected from the COM port
         
         if (needs_bootload){
+            apply_motor_pwm(0);
             Jump_To_Reset(true);
         }
     }
