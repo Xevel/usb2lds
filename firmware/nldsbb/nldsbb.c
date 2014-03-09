@@ -63,8 +63,8 @@ uint8_t has_new_rpm_value;
 void usart_setup(){ // Usart at 115200, 8N1
     cli();
     UCSRA = (1<<U2X); // x2
-    UBRRL = 16; // cf datasheet p144
-    UCSRB =  (1<<RXCIE) | (1 << RXEN) | (1 << TXEN);  // enable RX and its interrupt
+    UBRRL = 16; // cf attiny2313 datasheet p144
+    UCSRB =  (1<<RXCIE) | (1 << RXEN) | (1 << TXEN);  // enable RX and its interrupt // TX for debug
     sei();
 }
 
@@ -140,8 +140,8 @@ int main(void)
                 new_mot_pwm = 255;
             }
             motor_pwm = (uint8_t) new_mot_pwm;
-            usart_write((uint8_t)err);
-            usart_write((uint8_t)(err>>8));
+            //usart_write((uint8_t)err);
+            //usart_write((uint8_t)(err>>8));
         }
         
         if ( mot_should_run() ){

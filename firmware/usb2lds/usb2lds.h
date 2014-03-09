@@ -1,12 +1,15 @@
 /*
-             LUFA Library
-     Copyright (C) Dean Camera, 2013.
+    usb2lds.h
 
-  dean [at] fourwalledcubicle [dot] com
-           www.lufa-lib.org
+    Copyright 2014 - Nicolas "Xevel" Saugnier
+
+    Based on:
+    - LUFA library, by Dean Camera
+    - USB2AX, By Nicolas Saugnier and Richard Ibbotson  
 */
-
 /*
+  Original notice:
+
   Copyright 2013  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
@@ -28,13 +31,8 @@
   this software.
 */
 
-/** \file
- *
- *  Header file for VirtualSerial.c.
- */
-
-#ifndef _VIRTUALSERIAL_H_
-#define _VIRTUALSERIAL_H_
+#ifndef _USB2LDS_H_
+#define _USB2LDS_H_
 
 	/* Includes: */
 		#include <avr/io.h>
@@ -50,31 +48,13 @@
 		#include <LUFA/Drivers/USB/USB.h>
 		#include <LUFA/Platform/Platform.h>
 
-        #define bitSet(value, bit)       ((value) |= (1UL << (bit)))
-        #define bitClear(value, bit)     ((value) &= ~(1UL << (bit)))
-
-	/* Macros: */
-		///** LED mask for the library LED driver, to indicate that the USB interface is not ready. */
-		//#define LEDMASK_USB_NOTREADY      LEDS_LED1
-//
-		///** LED mask for the library LED driver, to indicate that the USB interface is enumerating. */
-		//#define LEDMASK_USB_ENUMERATING  (LEDS_LED2 | LEDS_LED3)
-//
-		///** LED mask for the library LED driver, to indicate that the USB interface is ready. */
-		//#define LEDMASK_USB_READY        (LEDS_LED2 | LEDS_LED4)
-//
-		///** LED mask for the library LED driver, to indicate that an error has occurred in the USB interface. */
-		//#define LEDMASK_USB_ERROR        (LEDS_LED1 | LEDS_LED3)
-
-	/* Function Prototypes: */
 		void SetupHardware(void);
-
-        void usart_setup();
+        void usart_init();
         void apply_motor_pwm(uint8_t val);
+        void tx_led_on();
+        void tx_led_off();
+        void tx_led_toggle();
 
-
-		void EVENT_USB_Device_Connect(void);
-		void EVENT_USB_Device_Disconnect(void);
 		void EVENT_USB_Device_ConfigurationChanged(void);
 		void EVENT_USB_Device_ControlRequest(void);
         void EVENT_CDC_Device_LineEncodingChanged(USB_ClassInfo_CDC_Device_t* const CDCInterfaceInfo);

@@ -1,12 +1,15 @@
 /*
-             LUFA Library
-     Copyright (C) Dean Camera, 2013.
+    usb2lds.c
 
-  dean [at] fourwalledcubicle [dot] com
-           www.lufa-lib.org
+    Copyright 2014 - Nicolas "Xevel" Saugnier
+
+    Based on:
+    - LUFA library, by Dean Camera
+    - USB2AX, By Nicolas Saugnier and Richard Ibbotson  
 */
-
 /*
+  Original notice:
+
   Copyright 2013  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
@@ -30,14 +33,13 @@
 
 /** \file
  *
- *  Main source file for the VirtualSerial demo. This file contains the main tasks of
- *  the demo and is responsible for the initial application hardware configuration.
+ *  Main source file for the usb2lds firmware. It does the hardware initialization, reads data from one end and sends it to the other.
  */
 
 #include "usb2lds.h"
 #include "reset.h"
 #include <nlds/nlds.h>
-
+#include "time.h"
 
 // Pin wired:
 //   USART RX   (PD2/RXD1)
@@ -50,10 +52,6 @@
 //   !SS        PB0
 
 
-/** LUFA CDC Class driver interface configuration and state information. This structure is
- *  passed to all CDC Class driver functions, so that multiple instances of the same class
- *  within a device can be differentiated from one another.
- */
 USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface =
 	{
 		.Config =
@@ -80,109 +78,404 @@ USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface =
 			},
 	};
 
-/** Standard file stream for the CDC interface when set up, so that the virtual CDC COM port can be
- *  used like any regular character stream in the C APIs
- */
 static FILE USBSerialStream;
 
-uint8_t needs_bootload = false; // In EVENT_CDC_Device_LineEncodingChanged, this flag is set when the baudrate is at a pre-defined value
-
-
-/** Circular buffer to hold data from the host before it is sent to the device via the serial port. */
 static RingBuffer_t USBtoUSART_Buffer;
-
-/** Underlying data buffer for \ref USBtoUSART_Buffer, where the stored bytes are located. */
 static uint8_t      USBtoUSART_Buffer_Data[128];
-
-/** Circular buffer to hold data from the serial port before it is sent to the host. */
 static RingBuffer_t USARTtoUSB_Buffer;
-
-/** Underlying data buffer for \ref USARTtoUSB_Buffer, where the stored bytes are located. */
 static uint8_t      USARTtoUSB_Buffer_Data[128];
 
+uint8_t needs_bootload = false; // In EVENT_CDC_Device_LineEncodingChanged, this flag is set when the baudrate is at a pre-defined value
+uint8_t setup_mode;
+uint8_t display_mode;
+
+#define DISPLAY_NONE 0
+#define DISPLAY_GRAPH 1
+#define DISPLAY_VALUES 2
+
 uint16_t rpm;
+uint16_t last_rpm;
 uint8_t has_new_rpm_value;
+uint8_t mot_should_run;
+uint32_t last_rpm_timestamp;
 
-int16_t rpm_setpoint = 19200; //speed is expressed in 64th of rpm (6 bit shift) and we want it to turn at 300 rpm (= 5 rotation/s)
-uint8_t motor_pwm = 200;
+int16_t rpm_setpoint; //speed is expressed in 64th of rpm (6 bit shift) and we want it to turn at 300 rpm (= 5 rotation/s)
+uint8_t motor_pwm;
 
-float Kp = 0.004;
-float Ki = 0.00;
-float Kd = 0.00;
+uint8_t feedforward_fixed;
+double feedforward_coeff;
+uint8_t feedforward_mode;
 
-/** Main program entry point. This routine contains the overall program flow, including initial
- *  setup of all components and the main program loop.
- */
+#define FEEDFORWARD_NONE            (0)
+#define FEEDFORWARD_FIXED           (1)
+#define FEEDFORWARD_PROPORTIONAL    (2)
+
+double Kp;
+double Ki;
+double Kd;
+double err_acc;
+double last_err;
+double delta;
+
+// assign 4 byte for each, even the ones that are smaller than that in case we want to change their size later without having to chang all the other ones.
+#define EE_ADDR_KP          (   (float*)32)
+#define EE_ADDR_KI          (   (float*)36)
+#define EE_ADDR_KD          (   (float*)40)
+#define EE_ADDR_SETPOINT    ((uint16_t*)44)
+#define EE_ADDR_DELTA       (   (float*)48)
+#define EE_ADDR_FF_MODE     ( (uint8_t*)52)
+#define EE_ADDR_FF_FIXED    ( (uint8_t*)56)
+#define EE_ADDR_FF_COEFF    (   (float*)60)
+#define EE_ADDR_MAGIC       ((uint32_t*)64)
+uint32_t eeprom_magic_value = 0xbadbeef;
+
+void save_eeprom(){
+    eeprom_update_float(EE_ADDR_KP, Kp);
+    eeprom_update_float(EE_ADDR_KI, Ki);
+    eeprom_update_float(EE_ADDR_KD, Kd);
+    eeprom_update_word(EE_ADDR_SETPOINT, rpm_setpoint);
+    eeprom_update_float(EE_ADDR_DELTA, delta);
+    eeprom_update_byte(EE_ADDR_FF_MODE, feedforward_mode);
+    eeprom_update_byte(EE_ADDR_FF_FIXED, feedforward_fixed);
+    eeprom_update_float(EE_ADDR_FF_COEFF, feedforward_coeff);
+    eeprom_update_dword(EE_ADDR_MAGIC, eeprom_magic_value);
+}
+
+void load_default(){
+    Kp = 1.0;
+    Ki = 0.0;
+    Kd = 0.0;
+    rpm_setpoint = 19200; // = 300rpm * 64
+    delta = 1.0;
+    feedforward_fixed = 190;
+    feedforward_coeff = 100.0;
+    feedforward_mode = FEEDFORWARD_PROPORTIONAL;
+}
+
+void load_eeprom(){
+    Kp = eeprom_read_float(EE_ADDR_KP);
+    Ki = eeprom_read_float(EE_ADDR_KI);
+    Kd = eeprom_read_float(EE_ADDR_KD);
+    rpm_setpoint = eeprom_read_word(EE_ADDR_SETPOINT);
+    delta = eeprom_read_float(EE_ADDR_DELTA);
+    feedforward_fixed = eeprom_read_byte(EE_ADDR_FF_FIXED);
+    feedforward_coeff = eeprom_read_float(EE_ADDR_FF_COEFF);
+    feedforward_mode = eeprom_read_byte(EE_ADDR_FF_MODE);
+}
+
+void show_pid(){    
+    fprintf(&USBSerialStream, "Setpoint=%u (%.2frpm, %.2frps)\r\nKp=%.3f, Ki=%.3f, Kd=%.3f [delta=%.3f]\r\n",
+        rpm_setpoint,
+        (double)rpm_setpoint/64,
+        (double)rpm_setpoint/3840,
+        Kp, Ki, Kd,
+        delta);
+}
+
+
+void show_display(){
+    switch (display_mode)
+    {
+        case DISPLAY_VALUES:
+            fprintf(&USBSerialStream, "Display Values [rpm, error, output before clamping]\r\n");
+            break;
+        case DISPLAY_GRAPH:
+            fprintf(&USBSerialStream, "Display Graph (not implemented yet)\r\n");
+            break;
+        default:
+            fprintf(&USBSerialStream, "Display None\r\n");
+            break;
+    }
+
+}
+
+void show_feedforward(){
+    fprintf(&USBSerialStream, "Feedforward fixed = %u\r\n", feedforward_fixed);
+    fprintf(&USBSerialStream, "Feedforward proportional = %u/%.2f = %.2f\r\n", rpm_setpoint, feedforward_coeff, (double)rpm_setpoint/feedforward_coeff);
+    fprintf(&USBSerialStream, "Feedforward current mode: ");
+    switch (feedforward_mode)
+    {
+        case FEEDFORWARD_FIXED:
+            fprintf(&USBSerialStream, "FIXED\r\n");
+            break;
+        case FEEDFORWARD_PROPORTIONAL:
+            fprintf(&USBSerialStream, "PROPORTIONAL\r\n");
+            break;
+        default:
+            fprintf(&USBSerialStream, "NONE\r\n");
+            break;
+    }
+}
+
+void show_motor(){
+    if (mot_should_run){
+        fprintf(&USBSerialStream, "Motor ON\r\n");
+    } else {
+        fprintf(&USBSerialStream, "Motor OFF\r\n");
+    }
+}
+
+void eeprom_init(){
+    if (eeprom_read_dword(EE_ADDR_MAGIC) != eeprom_magic_value){
+        load_default();
+    } else {
+        load_eeprom();
+    }
+}
+
 int main(void)
 {
 	SetupHardware();
+    eeprom_init();
+    motor_pwm = 190;
+
     RingBuffer_InitBuffer(&USBtoUSART_Buffer, USBtoUSART_Buffer_Data, sizeof(USBtoUSART_Buffer_Data));
     RingBuffer_InitBuffer(&USARTtoUSB_Buffer, USARTtoUSB_Buffer_Data, sizeof(USARTtoUSB_Buffer_Data));
 
-	/* Create a regular character stream for the interface so that it can be used with the stdio.h functions */
+	// Create a regular character stream for the interface so that it can be used with the stdio.h functions
 	CDC_Device_CreateStream(&VirtualSerial_CDC_Interface, &USBSerialStream);
 
-	//LEDs_SetAllLEDs(LEDMASK_USB_NOTREADY);
 	GlobalInterruptEnable();
 
 	for (;;)
 	{
+        if (setup_mode){
+            int16_t c = CDC_Device_ReceiveByte(&VirtualSerial_CDC_Interface);
+            if (!(c < 0)){
+                switch(c){
+                    case 'L': // reset
+                        fprintf(&USBSerialStream, "Load default values\r\n");
+                        load_default();
+                    case 'a':
+                        show_pid();
+                        show_feedforward();
+                        show_motor();
+                        show_display();
+                        break;
+                    //PID coef adjust
+                    case 'p':
+                        Kp -= delta;
+                        if (Kp < 0){
+                            Kp = 0;
+                        }
+                        show_pid();
+                        break;
+                    case 'P':
+                        Kp += delta;
+                        show_pid();
+                        break;
+                    case 'i':
+                        Ki -= delta;
+                        if (Ki < 0){
+                            Ki = 0;
+                        }
+                        show_pid();
+                        break;
+                    case 'I':
+                        Ki += delta;
+                        show_pid();
+                        break;
+                    case 'd':
+                        Kd -= delta;
+                        if (Kd < 0){
+                            Kd = 0;
+                        }
+                        show_pid();
+                        break;
+                    case 'D':
+                        Kd += delta;
+                        show_pid();
+                        break;
+                    case '+':
+                        delta *= 10.0;
+                        show_pid();
+                        break;
+                    case '-':
+                        delta /= 10.0;
+                        show_pid();
+                        break;
+                    case 'r':
+                        rpm_setpoint -= 64;
+                        show_pid();
+                        break;
+                    case 'R':
+                        rpm_setpoint += 64;
+                        show_pid();
+                        break;
 
-        /* Only try to read in bytes from the CDC interface if the transmit buffer is not full */
-        if (!(RingBuffer_IsFull(&USBtoUSART_Buffer)))
-        {
-            int16_t ReceivedByte = CDC_Device_ReceiveByte(&VirtualSerial_CDC_Interface);
+                    case '0':
+                        feedforward_mode = FEEDFORWARD_NONE;
+                        show_feedforward();
+                        break;
+                    case '1':
+                        feedforward_mode = FEEDFORWARD_FIXED;
+                        show_feedforward();
+                        break;
+                    case '2':
+                        feedforward_mode = FEEDFORWARD_PROPORTIONAL;
+                        show_feedforward();
+                        break;
+                        
+                    case 'f':
+                        feedforward_fixed -= 1;
+                        show_feedforward();
+                        break;
+                    case 'F':
+                        feedforward_fixed += 1;
+                        show_feedforward();
+                        break;
 
-            /* Store received byte into the USART transmit buffer */
-            if (!(ReceivedByte < 0))
-            RingBuffer_Insert(&USBtoUSART_Buffer, ReceivedByte);
+                    case 'c':
+                        feedforward_coeff -= delta;
+                        show_feedforward();
+                        break;
+                    case 'C':
+                        feedforward_coeff += delta;
+                        show_feedforward();
+                        break;
+
+                    case 's': // save
+                        save_eeprom();
+                        fprintf(&USBSerialStream, "Values saved to EEPROM\r\n");
+                        break;
+                    
+                    case 'm':
+                        mot_should_run = 0;
+                        show_motor();
+                        break;
+                    case 'M':
+                        mot_should_run = 1;
+                        show_motor();
+                        break;
+                    case 'g':
+                        display_mode = DISPLAY_NONE;
+                        show_display();
+                        break;
+                    case 'G':
+                        display_mode = DISPLAY_GRAPH;
+                        show_display();
+                        break;
+                    case 'v':
+                        display_mode = DISPLAY_VALUES;
+                        show_display();
+                        break;
+                }
+            }
+
+
+        } else {
+            //Copy data from USB to the LDS buffer, if there is room.
+            if (!(RingBuffer_IsFull(&USBtoUSART_Buffer)))
+            {
+                int16_t ReceivedByte = CDC_Device_ReceiveByte(&VirtualSerial_CDC_Interface);
+                if (!(ReceivedByte < 0)){
+                    RingBuffer_Insert(&USBtoUSART_Buffer, ReceivedByte);
+                }
+            }
+
+            //Send data from the LDS to USB
+            uint16_t BufferCount = RingBuffer_GetCount(&USARTtoUSB_Buffer);
+            if (BufferCount)
+            {
+                Endpoint_SelectEndpoint(VirtualSerial_CDC_Interface.Config.DataINEndpoint.Address);
+
+                if (Endpoint_IsINReady())
+                {
+                    // Never send more than one bank size less one byte to the host at a time, so that we don't block
+                    // while a Zero Length Packet (ZLP) to terminate the transfer is sent if the host isn't listening
+                    uint8_t BytesToSend = MIN(BufferCount, (CDC_TXRX_EPSIZE - 1));
+                    while (BytesToSend--)
+                    {
+                        if (CDC_Device_SendByte(&VirtualSerial_CDC_Interface,
+                        RingBuffer_Peek(&USARTtoUSB_Buffer)) != ENDPOINT_READYWAIT_NoError)
+                        {
+                            break;
+                        }
+
+                        // Dequeue the already sent byte from the buffer now we have confirmed that no transmission error occurred
+                        RingBuffer_Remove(&USARTtoUSB_Buffer);
+                    }
+                }
+            }
+            
+            // Load the next byte from the USART transmit buffer into the USART
+            if (!(RingBuffer_IsEmpty(&USBtoUSART_Buffer))){
+                Serial_SendByte(RingBuffer_Remove(&USBtoUSART_Buffer));
+            }
         }
-
-		uint16_t BufferCount = RingBuffer_GetCount(&USARTtoUSB_Buffer);
-		if (BufferCount)
-		{
-			Endpoint_SelectEndpoint(VirtualSerial_CDC_Interface.Config.DataINEndpoint.Address);
-
-			/* Check if a packet is already enqueued to the host - if so, we shouldn't try to send more data
-			 * until it completes as there is a chance nothing is listening and a lengthy timeout could occur */
-			if (Endpoint_IsINReady())
-			{
-				/* Never send more than one bank size less one byte to the host at a time, so that we don't block
-				 * while a Zero Length Packet (ZLP) to terminate the transfer is sent if the host isn't listening */
-				uint8_t BytesToSend = MIN(BufferCount, (CDC_TXRX_EPSIZE - 1));
-
-				/* Read bytes from the USART receive buffer into the USB IN endpoint */
-				while (BytesToSend--)
-				{
-					/* Try to send the next byte of data to the host, abort if there is an error without dequeuing */
-					if (CDC_Device_SendByte(&VirtualSerial_CDC_Interface,
-											RingBuffer_Peek(&USARTtoUSB_Buffer)) != ENDPOINT_READYWAIT_NoError)
-					{
-						break;
-					}
-
-					/* Dequeue the already sent byte from the buffer now we have confirmed that no transmission error occurred */
-					RingBuffer_Remove(&USARTtoUSB_Buffer);
-				}
-			}
-		}
-
-
-		/* Load the next byte from the USART transmit buffer into the USART */
-		if (!(RingBuffer_IsEmpty(&USBtoUSART_Buffer))){
-            Serial_SendByte(RingBuffer_Remove(&USBtoUSART_Buffer));
-        }
-		
         
+		
+        uint16_t dt = 1; // init just to avoid potential warning
+
         cli();
         if (nlds_rpm_updated_get()){
             rpm = nlds_rpm_get();
             nlds_rpm_updated_clear();
             has_new_rpm_value = 1;
+            dt = micros_reset();
         }
         sei();
 
-        // TODO motor control
+        // tx_led_toggle(); // TODO flash the led when stuff happens
+        
+        // motor control
+        if (has_new_rpm_value && rpm!=last_rpm){
+            has_new_rpm_value = 0;
+            double err = (double)rpm_setpoint - rpm;
+
+            double fdt = (double)dt/1000.0; // get back to something closer to 1 to avoid orders of magnitude of difference in the coeffs
+            
+            err_acc += err;
+
+            double output = Kp * err + Kd * (last_err-err)/fdt + Ki * err_acc*fdt;
+            
+            switch(feedforward_mode){
+                case FEEDFORWARD_FIXED:
+                    output += feedforward_fixed;
+                    break;
+                case FEEDFORWARD_PROPORTIONAL:
+                    output += (double)rpm_setpoint / feedforward_coeff; 
+                    break;
+                case FEEDFORWARD_NONE:
+                default:
+                    break;
+            }
+            
+            last_err = err;
+            last_rpm = rpm;
+
+            if (setup_mode){
+                switch(display_mode){
+                    case DISPLAY_GRAPH:
+                        // display on 80 columns the output and setpoint
+
+                        //TODO
+                        
+                        break;
+                    case DISPLAY_VALUES:
+                        fprintf(&USBSerialStream, "%u %f %f\r\n", rpm, err, output);
+                        break;
+                    case DISPLAY_NONE:
+                    default:
+                        break;
+
+                }
+            }
+
+            if (output > 255){
+                output = 255;
+            } else if (output < 0){
+                output = 0;
+            }
+
+            motor_pwm = (uint8_t) output;
+
+        }
+        if ( mot_should_run ){
+            apply_motor_pwm(motor_pwm);
+        } else {
+            apply_motor_pwm(0);
+        }
 
 		CDC_Device_USBTask(&VirtualSerial_CDC_Interface);
 		USB_USBTask();
@@ -190,54 +483,56 @@ int main(void)
 }
 
 
-void usart_write(uint8_t data){ // for debug, the pin is left unconnected
-    loop_until_bit_is_set(UCSR1A, UDRE1);
-    UDR1 = data;
-}
-
-
-void usart_setup(){ // Usart at 115200, 8N1
+void usart_init(){ // Usart at 115200, 8N1
     cli();
     UCSR1A = (1<<U2X1); // x2
     UBRR1L = 16; // cf datasheet p175
     
-    // enable RX and its interrupt
-    #ifdef DEBUG
+    // enable TX, RX and RX interrupt
     UCSR1B =  (1<<RXCIE1) | (1 << RXEN1) | (1 << TXEN1); 
-    #else
-    UCSR1B =  (1<<RXCIE1) | (1 << RXEN1) ; 
-    #endif
     sei();
+}
+
+void motor_init(){
+    // Setup motor PWM (PD5/OC0B), inverting logic, phase correct (mode 1)
+    TCCR0A = (1 << COM0A1) | (0 << COM0A0) | (0 << WGM01) | (1 << WGM00);
+    TCCR0B = (0 << WGM02) | (1 << CS02) | (0 << CS01) | (0 << CS00);
+    apply_motor_pwm(0);
+    bitSet(DDRB, 7);
 }
 
 void apply_motor_pwm(uint8_t val){
     OCR0A = val;
 }
 
-/** Configures the board hardware and chip peripherals for the demo's functionality. */
+void tx_led_init(){
+    tx_led_off();
+    bitSet(DDRD, 0);
+}
+void tx_led_on(){
+    bitClear(PORTD, 0);
+}
+void tx_led_off(){
+    bitSet(PORTD, 0);
+}
+void tx_led_toggle(){
+    bitSet(PIND, 0);
+}
+
 void SetupHardware(void)
 {
-	/* Disable watchdog if enabled by bootloader/fuses */
+	// Disable watchdog if enabled by bootloader/fuses
 	MCUSR &= ~(1 << WDRF);
 	wdt_disable();
 
-	/* Disable clock division */
-	clock_prescale_set(clock_div_1);
+    clock_prescale_set(clock_div_1);
 
-	/* Hardware Initialization */
-	USB_Init();
-    
-    // TODO motor init
-    // Setup motor PWM (PD5/OC0B), inverting logic, phase correct (mode 1)
-    TCCR0A = (1 << COM0A1) | (0 << COM0A0) | (0 << WGM01) | (1 << WGM00);
-    TCCR0B = (0 << WGM02) | (1 << CS02) | (0 << CS01) | (0 << CS00);
-    apply_motor_pwm(motor_pwm);
-    bitSet(DDRB, 7);
-
-    usart_setup();
+    micros_init();
+    USB_Init();
+    usart_init();
+    tx_led_init();
+    motor_init();
 }
-
-
 
 
 ISR(USART1_RX_vect)
@@ -252,59 +547,40 @@ ISR(USART1_RX_vect)
 }
 
 
-
-/** Event handler for the library USB Connection event. */
-void EVENT_USB_Device_Connect(void)
-{
-	//LEDs_SetAllLEDs(LEDMASK_USB_ENUMERATING);
-}
-
-/** Event handler for the library USB Disconnection event. */
-void EVENT_USB_Device_Disconnect(void)
-{
-	//LEDs_SetAllLEDs(LEDMASK_USB_NOTREADY);
-}
-
-/** Event handler for the library USB Configuration Changed event. */
 void EVENT_USB_Device_ConfigurationChanged(void)
 {
-	bool ConfigSuccess = true;
-
-	ConfigSuccess &= CDC_Device_ConfigureEndpoints(&VirtualSerial_CDC_Interface);
-
-	//LEDs_SetAllLEDs(ConfigSuccess ? LEDMASK_USB_READY : LEDMASK_USB_ERROR);
+	CDC_Device_ConfigureEndpoints(&VirtualSerial_CDC_Interface);
 }
 
-/** Event handler for the library USB Control Request reception event. */
 void EVENT_USB_Device_ControlRequest(void)
 {
 	CDC_Device_ProcessControlRequest(&VirtualSerial_CDC_Interface);
 }
 
-/** Event handler for the CDC Class driver Line Encoding Changed event.
- *
- *  \param[in] CDCInterfaceInfo  Pointer to the CDC class interface configuration structure being referenced
- */
 void EVENT_CDC_Device_LineEncodingChanged(USB_ClassInfo_CDC_Device_t* const CDCInterfaceInfo){
-    // Set the baud rate, ignore the rest of the configuration (parity, char format, number of bits in a byte) since the servos only understand 8N1
+    // we don't allow changing the baud rate or any other details, things are already set up the right way to talk to the LDS.
 
     // If the baudrate is at this special (and unlikely) value, it means that we want to trigger the bootloader
     if (CDCInterfaceInfo->State.LineEncoding.BaudRateBPS == 1200){
         needs_bootload = true;
-    }
+        setup_mode = true;
+    } else if (CDCInterfaceInfo->State.LineEncoding.BaudRateBPS == 1337){
+        setup_mode = true;
+    } else {
+        setup_mode = false;
+    }   
 }
-    
-
 
 // *********************  Soft reset/bootloader functionality *******************************************
 // The bootloader can be ran by opening the serial port at 1200bps. Upon closing it, the reset process will be initiated
 // and two seconds later, the board will re-enumerate as a DFU bootloader.
 
-
 // adapted from http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&p=1008792#1008792
 void EVENT_CDC_Device_ControLineStateChanged(USB_ClassInfo_CDC_Device_t* const CDCInterfaceInfo){
     static bool PreviousDTRState = false;
     bool        CurrentDTRState  = (CDCInterfaceInfo->State.ControlLineStates.HostToDevice & CDC_CONTROL_LINE_OUT_DTR);
+
+    mot_should_run = CurrentDTRState;
 
     /* Check how the DTR line has been asserted */
     if (PreviousDTRState && !(CurrentDTRState) ){
