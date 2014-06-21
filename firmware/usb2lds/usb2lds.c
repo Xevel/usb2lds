@@ -142,9 +142,9 @@ void save_eeprom(){
 }
 
 void load_default(){
-    Kp = 1.0;
-    Ki = 0.0;
-    Kd = 0.0;
+    Kp = 0.05;
+    Ki = 0.0001;
+    Kd = 0.0001;
     rpm_setpoint = 19200; // = 300rpm * 64
     delta = 1.0;
     feedforward_fixed = 190;
@@ -164,7 +164,7 @@ void load_eeprom(){
 }
 
 void show_pid(){    
-    fprintf(&USBSerialStream, "Setpoint=%u (%.2frpm, %.2frps)\r\nKp=%.3f, Ki=%.3f, Kd=%.3f [delta=%.3f]\r\n",
+    fprintf(&USBSerialStream, "Setpoint=%u (%.2frpm, %.2frps)\r\nKp=%.5f, Ki=%.5f, Kd=%.5f [delta=%.5f]\r\n",
         rpm_setpoint,
         (double)rpm_setpoint/64,
         (double)rpm_setpoint/3840,
@@ -569,7 +569,7 @@ void EVENT_CDC_Device_LineEncodingChanged(USB_ClassInfo_CDC_Device_t* const CDCI
     if (CDCInterfaceInfo->State.LineEncoding.BaudRateBPS == 1200){
         needs_bootload = true;
         setup_mode = true;
-    } else if (CDCInterfaceInfo->State.LineEncoding.BaudRateBPS == 1337){
+    } else if ( CDCInterfaceInfo->State.LineEncoding.BaudRateBPS == 9600 || CDCInterfaceInfo->State.LineEncoding.BaudRateBPS == 1337){
         setup_mode = true;
     } else {
         setup_mode = false;
